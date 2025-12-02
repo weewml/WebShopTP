@@ -423,7 +423,7 @@
 
             pendingOrders.forEach(order => {
                 const row = document.createElement('tr');
-                const productName = productsMap[order.product_id] || `Товар #${order.product_id}`;
+                const productName = productsMap[order.productId] || `Товар #${order.productId}`;
 
                 row.innerHTML = `
                     <td>${order.id}</td>

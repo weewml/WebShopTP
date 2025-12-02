@@ -460,8 +460,8 @@
 
             data.forEach(order => {
                 const row = document.createElement('tr');
-                const product = allProducts.find(p => p.id === order.product_id);
-                const productName = product ? product.name : `Товар #${order.product_id}`;
+                const product = allProducts.find(p => p.id === order.productId);
+                const productName = product ? product.name : `Товар #${order.productId}`;
                 const statusClass = getStatusClass(order.status);
 
                 row.innerHTML = `

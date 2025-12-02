@@ -68,10 +68,6 @@
             transform: translateY(-2px);
         }
 
-        .logout-btn:active {
-            transform: translateY(0);
-        }
-
         .container {
             max-width: 1200px;
             margin: 30px auto;
@@ -92,6 +88,26 @@
             color: #667eea;
         }
 
+        .message {
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
         .btn {
             padding: 8px 16px;
             background: #667eea;
@@ -109,9 +125,25 @@
             transform: translateY(-2px);
         }
 
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
         .btn-sm {
             padding: 5px 10px;
             font-size: 12px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
         }
 
         table {
@@ -139,26 +171,6 @@
             background: #f5f5f5;
         }
 
-        .message {
-            padding: 12px 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            display: none;
-            font-size: 14px;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-
         .status-badge {
             display: inline-block;
             padding: 5px 10px;
@@ -167,32 +179,83 @@
             font-weight: 600;
         }
 
-        .status-processing {
+        .status-waiting {
             background: #fff3cd;
             color: #856404;
         }
 
-        .status-accepted {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .status-in-delivery {
+        .status-assigned {
             background: #d1ecf1;
             color: #0c5460;
         }
 
-        .status-delivered {
-            background: #d4edda;
-            color: #155724;
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
-        input[type="text"],
-        select {
-            padding: 6px;
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
         }
 
         @media (max-width: 768px) {
@@ -205,10 +268,6 @@
             .header-info {
                 flex-direction: column;
                 width: 100%;
-            }
-
-            .user-info {
-                text-align: center;
             }
         }
     </style>
@@ -228,9 +287,9 @@
 </div>
 
 <div class="container">
-    <!-- Заказы в обработке -->
+    <!-- Заказы в ожидании -->
     <div class="card">
-        <h2>📋 Заказы в обработке</h2>
+        <h2>📋 Заказы на отправку</h2>
         <div id="orders-message" class="message"></div>
         <table>
             <thead>
@@ -240,46 +299,50 @@
                 <th>Кол-во</th>
                 <th>Заказчик</th>
                 <th>Статус</th>
-                <th>Курьер</th>
                 <th>Действия</th>
             </tr>
             </thead>
             <tbody id="ordersTable">
             <tr>
-                <td colspan="7" style="text-align: center; color: #999;">Загрузка...</td>
+                <td colspan="6" style="text-align: center; color: #999;">Загрузка...</td>
             </tr>
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- Модальное окно для выбора курьера -->
-<div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; min-width: 400px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);">
-        <h3 style="margin-bottom: 20px; color: #333;">Выберите курьера для доставки</h3>
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">Курьер:</label>
-            <select id="courierSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                <option value="">Выбрать курьера...</option>
-            </select>
+<!-- Modal для выбора курьера -->
+<div id="courierModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Выберите курьера</div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="courierSelect">Курьер</label>
+                <select id="courierSelect">
+                    <option value="">-- Выберите курьера --</option>
+                </select>
+            </div>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button onclick="acceptOrder()" style="flex: 1; padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Отправить с курьером</button>
-            <button onclick="closeModal()" style="flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Отмена</button>
+        <div class="modal-footer">
+            <button class="btn btn-danger btn-sm" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-success btn-sm" onclick="acceptOrder()">Отправить</button>
         </div>
     </div>
 </div>
 
 <script>
+    let currentUserLogin = null;
+    let selectedOrderId = null;
     let productsMap = {};
     let couriers = [];
-    let selectedOrderId = null;
 
     window.addEventListener('load', () => {
         loadUserInfo();
         loadProducts();
         loadCouriers();
         loadOrders();
+        // Обновляем заказы каждые 5 секунд
+        setInterval(loadOrders, 5000);
     });
 
     function loadUserInfo() {
@@ -295,7 +358,9 @@
         })
         .then(data => {
             if (data) {
+                currentUserLogin = data.login;
                 document.getElementById('userLogin').textContent = data.login;
+                loadOrders();
             }
         })
         .catch(err => {
@@ -323,9 +388,12 @@
         })
         .then(response => response.json())
         .then(data => {
-            couriers = data.filter(u => u.role === 'COURIER');
+            // Фильтруем только курьеров
+            couriers = data.filter(user => user.role === 'COURIER');
+
+            // Заполняем dropdown
             const select = document.getElementById('courierSelect');
-            select.innerHTML = '<option value="">Выбрать курьера...</option>';
+            select.innerHTML = '<option value="">-- Выберите курьера --</option>';
             couriers.forEach(courier => {
                 const option = document.createElement('option');
                 option.value = courier.login;
@@ -345,28 +413,25 @@
             const tbody = document.getElementById('ordersTable');
             tbody.innerHTML = '';
 
-            const processingOrders = data.filter(o => o.status === 'В обработке');
+            // Фильтруем заказы в статусе "В обработке"
+            const pendingOrders = data.filter(o => o.status === 'В обработке');
 
-            if (processingOrders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">Заказов нет</td></tr>';
+            if (pendingOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Заказов нет</td></tr>';
                 return;
             }
 
-            processingOrders.forEach(order => {
+            pendingOrders.forEach(order => {
                 const row = document.createElement('tr');
                 const productName = productsMap[order.product_id] || `Товар #${order.product_id}`;
-                const statusClass = getStatusClass(order.status);
 
                 row.innerHTML = `
                     <td>${order.id}</td>
                     <td>${productName}</td>
                     <td>${order.quantity}</td>
                     <td>${order.customer || '-'}</td>
-                    <td><span class="status-badge ${statusClass}">${order.status}</span></td>
-                    <td>${order.courier || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm" onclick="openModal(${order.id})">Отправить</button>
-                    </td>
+                    <td><span class="status-badge status-waiting">${order.status}</span></td>
+                    <td><button class="btn btn-success btn-sm" onclick="openCourierModal(${order.id})">Отправить курьеру</button></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -377,28 +442,13 @@
         });
     }
 
-    function getStatusClass(status) {
-        switch (status) {
-            case 'В обработке':
-                return 'status-processing';
-            case 'Принят':
-                return 'status-accepted';
-            case 'Доставляется':
-                return 'status-in-delivery';
-            case 'Доставлен':
-                return 'status-delivered';
-            default:
-                return 'status-processing';
-        }
-    }
-
-    function openModal(orderId) {
+    function openCourierModal(orderId) {
         selectedOrderId = orderId;
-        document.getElementById('modal').style.display = 'block';
+        document.getElementById('courierModal').classList.add('active');
     }
 
     function closeModal() {
-        document.getElementById('modal').style.display = 'none';
+        document.getElementById('courierModal').classList.remove('active');
         selectedOrderId = null;
     }
 
@@ -414,13 +464,17 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ status: 'Доставляется', courier }),
+            body: JSON.stringify({
+                status: 'Передан курьеру',
+                courier: courier
+            }),
             credentials: 'same-origin'
         })
         .then(response => {
             if (response.ok) {
                 closeModal();
                 showMessage('orders-message', 'Заказ отправлен курьеру! ✅', 'success');
+                document.getElementById('courierSelect').value = '';
                 loadOrders();
             } else {
                 throw new Error('Error');
@@ -444,14 +498,13 @@
         }
     }
 
-    // Закрыть модаль при клике вне
-    window.onclick = function(event) {
-        const modal = document.getElementById('modal');
+    // Закрываем модал при клике вне области
+    window.addEventListener('click', (event) => {
+        const modal = document.getElementById('courierModal');
         if (event.target === modal) {
             closeModal();
         }
-    }
+    });
 </script>
 </body>
 </html>
-

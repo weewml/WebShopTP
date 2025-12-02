@@ -68,10 +68,6 @@
             transform: translateY(-2px);
         }
 
-        .logout-btn:active {
-            transform: translateY(0);
-        }
-
         .container {
             max-width: 1200px;
             margin: 30px auto;
@@ -90,6 +86,26 @@
             font-size: 20px;
             margin-bottom: 20px;
             color: #667eea;
+        }
+
+        .message {
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
         }
 
         .btn {
@@ -115,6 +131,23 @@
 
         .btn-success:hover {
             background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
         }
 
         .btn-sm {
@@ -147,26 +180,6 @@
             background: #f5f5f5;
         }
 
-        .message {
-            padding: 12px 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            display: none;
-            font-size: 14px;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-
         .status-badge {
             display: inline-block;
             padding: 5px 10px;
@@ -175,12 +188,7 @@
             font-weight: 600;
         }
 
-        .status-processing {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-accepted {
+        .status-assigned {
             background: #cfe2ff;
             color: #084298;
         }
@@ -195,6 +203,17 @@
             color: #155724;
         }
 
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -207,8 +226,12 @@
                 width: 100%;
             }
 
-            .user-info {
-                text-align: center;
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn-sm {
+                width: 100%;
             }
         }
     </style>
@@ -279,7 +302,6 @@
             if (data) {
                 currentUserLogin = data.login;
                 document.getElementById('userLogin').textContent = data.login;
-                // После загрузки текущего пользователя загружаем заказы
                 loadOrders();
             }
         })
@@ -313,8 +335,16 @@
             const tbody = document.getElementById('ordersTable');
             tbody.innerHTML = '';
 
-            // Фильтруем заказы только для текущего курьера
-            const myCourierOrders = data.filter(o => o.courier === currentUserLogin);
+            // ✅ Фильтруем заказы где courier равен текущему пользователю
+            // И статус "Передан курьеру" или в процессе доставки
+            const myCourierOrders = data.filter(o =>
+                o.courier === currentUserLogin &&
+                (o.status === 'Передан курьеру' ||
+                 o.status === 'В доставке' ||
+                 o.status === 'Доставлено' ||
+                 o.status === 'Заказ отменен' ||
+                 o.status === 'Доставлено без получения')
+            );
 
             if (myCourierOrders.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Заказов нет</td></tr>';
@@ -326,14 +356,29 @@
                 const productName = productsMap[order.product_id] || `Товар #${order.product_id}`;
                 const statusClass = getStatusClass(order.status);
 
-                // Кнопки действий в зависимости от статуса
+                // ✅ Кнопки действий в зависимости от статуса
                 let actionButtons = '';
-                if (order.status === 'Принят') {
-                    actionButtons = `<button class="btn btn-sm" onclick="changeStatus(${order.id}, 'Доставляется')">Начать доставку</button>`;
-                } else if (order.status === 'Доставляется') {
-                    actionButtons = `<button class="btn btn-success btn-sm" onclick="changeStatus(${order.id}, 'Доставлен')">Завершить</button>`;
-                } else if (order.status === 'Доставлен') {
+
+                if (order.status === 'Передан курьеру') {
+                    actionButtons = `
+                        <div class="actions">
+                            <button class="btn btn-warning btn-sm" onclick="changeStatus(${order.id}, 'В доставке')">Начать доставку</button>
+                        </div>
+                    `;
+                } else if (order.status === 'В доставке') {
+                    actionButtons = `
+                        <div class="actions">
+                            <button class="btn btn-success btn-sm" onclick="changeStatus(${order.id}, 'Доставлено')">✓ Доставлено</button>
+                            <button class="btn btn-warning btn-sm" onclick="changeStatus(${order.id}, 'Доставлено без получения')">Без получения</button>
+                            <button class="btn btn-danger btn-sm" onclick="changeStatus(${order.id}, 'Заказ отменен')">Отмена</button>
+                        </div>
+                    `;
+                } else if (order.status === 'Доставлено') {
                     actionButtons = '<span style="color: #28a745; font-weight: 600;">✓ Доставлено</span>';
+                } else if (order.status === 'Заказ отменен') {
+                    actionButtons = '<span style="color: #dc3545; font-weight: 600;">✗ Отменено</span>';
+                } else if (order.status === 'Доставлено без получения') {
+                    actionButtons = '<span style="color: #ffc107; font-weight: 600;">⚠ Без получения</span>';
                 }
 
                 row.innerHTML = `
@@ -355,16 +400,17 @@
 
     function getStatusClass(status) {
         switch (status) {
-            case 'В обработке':
-                return 'status-processing';
-            case 'Принят':
-                return 'status-accepted';
-            case 'Доставляется':
+            case 'Передан курьеру':
+                return 'status-assigned';
+            case 'В доставке':
                 return 'status-in-delivery';
-            case 'Доставлен':
+            case 'Доставлено':
                 return 'status-delivered';
+            case 'Заказ отменен':
+            case 'Доставлено без получения':
+                return 'status-cancelled';
             default:
-                return 'status-processing';
+                return 'status-assigned';
         }
     }
 
@@ -382,10 +428,14 @@
         .then(response => {
             if (response.ok) {
                 let message = '';
-                if (newStatus === 'Доставляется') {
-                    message = 'Доставка начата ✅';
-                } else if (newStatus === 'Доставлен') {
+                if (newStatus === 'Доставлено') {
                     message = 'Заказ доставлен ✅';
+                } else if (newStatus === 'Заказ отменен') {
+                    message = 'Заказ отменен ✅';
+                } else if (newStatus === 'Доставлено без получения') {
+                    message = 'Доставлено без получения ✅';
+                } else if (newStatus === 'В доставке') {
+                    message = 'Доставка начата ✅';
                 }
                 showMessage('orders-message', message, 'success');
                 loadOrders();

@@ -109,6 +109,14 @@
             font-size: 14px;
         }
 
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
         .btn {
             padding: 10px 20px;
             background: #667eea;
@@ -198,12 +206,13 @@
             font-weight: 600;
         }
 
-        .status-processing {
+        /* ✅ Все статусы из системы */
+        .status-waiting {
             background: #fff3cd;
             color: #856404;
         }
 
-        .status-accepted {
+        .status-assigned {
             background: #cfe2ff;
             color: #084298;
         }
@@ -216,6 +225,11 @@
         .status-delivered {
             background: #d4edda;
             color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .search-container {
@@ -235,6 +249,7 @@
             overflow-y: auto;
             display: none;
             z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .autocomplete-list.active {
@@ -346,6 +361,8 @@
         loadUserInfo();
         loadProducts();
         loadOrders();
+        // Обновляем заказы каждые 5 секунд
+        setInterval(loadOrders, 5000);
     });
 
     function loadUserInfo() {
@@ -470,15 +487,18 @@
     function getStatusClass(status) {
         switch (status) {
             case 'В обработке':
-                return 'status-processing';
-            case 'Принят':
-                return 'status-accepted';
-            case 'Доставляется':
+                return 'status-waiting';
+            case 'Передан курьеру':
+                return 'status-assigned';
+            case 'В доставке':
                 return 'status-in-delivery';
-            case 'Доставлен':
+            case 'Доставлено':
                 return 'status-delivered';
+            case 'Заказ отменен':
+            case 'Доставлено без получения':
+                return 'status-cancelled';
             default:
-                return 'status-processing';
+                return 'status-waiting';
         }
     }
 
@@ -523,7 +543,7 @@
     }
 
     function deleteOrder(id) {
-        if (!confirm('Вы уверены?')) return;
+        if (!confirm('Вы уверены, что хотите удалить заказ?')) return;
 
         fetch(`/api/orders/${id}`, {
             method: 'DELETE',
@@ -554,6 +574,16 @@
             window.location.href = '/logout';
         }
     }
+
+    // Закрываем autocomplete при клике вне области
+    document.addEventListener('click', (event) => {
+        const searchInput = document.getElementById('productSearch');
+        const autocompleteList = document.getElementById('autocompleteList');
+
+        if (!searchInput.contains(event.target) && !autocompleteList.contains(event.target)) {
+            autocompleteList.classList.remove('active');
+        }
+    });
 </script>
 </body>
 </html>

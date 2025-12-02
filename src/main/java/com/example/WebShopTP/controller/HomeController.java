@@ -12,7 +12,7 @@ public class HomeController {
     public String redirectByRole() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // todo ВОЗМОЖНО ОБНОВЛЕНИЕ ИЗ ЗА ЭТОГО
+
         if (auth == null || !auth.isAuthenticated()) {
             return "redirect:/login.html";
         }
@@ -35,7 +35,7 @@ public class HomeController {
     public String index() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated()) {
-            return "forward:/redirect-role";
+            return "redirect:/redirect-role";
         }
         return "redirect:/login.html";
     }

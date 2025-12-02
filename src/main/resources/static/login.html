@@ -202,6 +202,11 @@
             </div>
             <button type="submit" class="btn" id="loginBtn">Войти</button>
         </form>
+        -- Временно данные для захода --
+        <p>log: admi | pas: 1234</p>
+        <p>log: disp | pas: 1234</p>
+        <p>log: cour | pas: 1234</p>
+        <p>log: stkp | pas: 1234</p>
     </div>
 
     <!-- ФОРМА РЕГИСТРАЦИИ -->
@@ -331,20 +336,6 @@
             registerBtn.innerHTML = 'Зарегистрироваться';
         });
     }
-
-    window.addEventListener('load', () => {
-        fetch('/api/users/current', {
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.href = '/redirect-role';
-            }
-        })
-        .catch(err => {
-            console.log('User not authenticated');
-        });
-    });
 </script>
 </body>
 </html>

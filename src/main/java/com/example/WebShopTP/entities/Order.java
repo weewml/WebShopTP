@@ -35,52 +35,21 @@ public class Order {
         this.status = status;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 
-    public Long getProductId() {
-        return productId;
-    }
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
+    public String getCustomer() { return customer; }
+    public void setCustomer(String customer) { this.customer = customer; }
 
-    public Integer getQuantity() {
-        return quantity;
-    }
+    public String getCourier() { return courier; }
+    public void setCourier(String courier) { this.courier = courier; }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public String getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(String customer) {
-        this.customer = customer;
-    }
-
-    public String getCourier() {
-        return courier;
-    }
-
-    public void setCourier(String courier) {
-        this.courier = courier;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

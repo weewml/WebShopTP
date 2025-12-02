@@ -15,7 +15,6 @@ public class Product {
     @Column(nullable = false)
     private int quantity;
 
-    // Конструкторы, геттеры/сеттеры
     public Product() {}
     public Product(String name, int quantity) {
         this.name = name;

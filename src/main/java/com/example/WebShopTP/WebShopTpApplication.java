@@ -9,4 +9,3 @@ public class WebShopTpApplication {
         SpringApplication.run(WebShopTpApplication.class, args);
     }
 }
-// TODO Обновление страницы регистрации убрааать и проверить при удалении чтобы оки все было
